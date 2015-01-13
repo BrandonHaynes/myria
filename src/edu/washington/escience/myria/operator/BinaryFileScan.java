@@ -30,15 +30,15 @@ public class BinaryFileScan extends LeafOperator {
   /** Required for Java serialization. */
   private static final long serialVersionUID = 1L;
   /** The schema for the relation stored in this file. */
-  private final Schema schema;
+  protected final Schema schema;
   /** The source of the input data. */
   private final DataSource source;
   /** Holds the tuples that are ready for release. */
-  private transient TupleBatchBuffer buffer;
+  protected transient TupleBatchBuffer buffer;
   /** Indicates the endianess of the bin file to read. */
   private final boolean isLittleEndian;
   /** Data input to read data from the bin file. */
-  private transient DataInput dataInput;
+  protected transient DataInput dataInput;
 
   /**
    * Construct a new BinaryFileScan object that reads the given binary file and create tuples from the file data that
@@ -66,7 +66,7 @@ public class BinaryFileScan extends LeafOperator {
   }
 
   @Override
-  protected final TupleBatch fetchNextReady() throws DbException {
+  protected TupleBatch fetchNextReady() throws DbException {
     boolean building = false;
     try {
       while (buffer.numTuples() < TupleBatch.BATCH_SIZE) {
