@@ -14,7 +14,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "dataType")
 @JsonSubTypes({
     @Type(name = "Bytes", value = ByteArraySource.class), @Type(name = "File", value = FileSource.class),
-    @Type(name = "URI", value = UriSource.class), @Type(name = "Empty", value = EmptySource.class) })
+    @Type(name = "URI", value = UriSource.class), @Type(name = "Empty", value = EmptySource.class),
+    @Type(name = "Socket", value = SocketSource.class) })
 public interface DataSource {
   /**
    * Returns an {@link InputStream} providing read access to the bits in the specified data source.

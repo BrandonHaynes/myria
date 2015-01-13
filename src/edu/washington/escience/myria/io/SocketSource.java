@@ -32,14 +32,14 @@ public class SocketSource implements DataSource, Serializable {
   public SocketSource(@JsonProperty(value = "port", required = true) final int port,
                       @JsonProperty(value = "hostname", required = false) final String hostname,
                       @JsonProperty(value = "attempts", required = false) final int attempts) {
-    this.hostname = hostname;
-    this.port = port;
-    this.attempts = attempts != 0 ? attempts : DEFAULT_ATTEMPTS;
-
-    if(attempts <= 0)
+    if(attempts < 0)
       throw new IllegalArgumentException("Number of attempts must be positive.");
     else if(port <= 0)
       throw new IllegalArgumentException("Socket port number must be positive.");
+
+    this.hostname = hostname;
+    this.port = port;
+    this.attempts = attempts != 0 ? attempts : DEFAULT_ATTEMPTS;
   }
 
   @Override
