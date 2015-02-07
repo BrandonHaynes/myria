@@ -15,4 +15,4 @@ rest_port = 8753
 
 [workers]
 1 = localhost:9001
-2 = localhost:9002
+# 2 = localhost:9002

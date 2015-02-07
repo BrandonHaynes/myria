@@ -1,0 +1,24 @@
+{
+    "logicalRa": "Sequence[Store(public:adhoc:TwitterJoin)[Apply(column0=$0,column11=$3)[Select((($1 = $2) and ($3 > 42)))[CrossProduct[Scan(public:adhoc:TwitterK), Scan(public:adhoc:TwitterK)]]]]]",
+    "fragments": [
+        {
+            "operators": [{
+                    "opId": 1,
+                    "opType": "DbQueryScan",
+                    "schema": {"columnNames":["column0","column1"], "columnTypes": ["INT_TYPE","INT_TYPE"]},
+                    "sql":"SELECT column0, column1 FROM \"public:adhoc:smallEx\"",
+                    "opName": "SQL"
+                },
+                {   
+                    "opId": 2,
+                    "opType": "SocketDataOutput",
+                    "argChild": 1,
+                    "port":9999,
+                    "header": true,
+                    "numDims": 0
+                }
+            ]
+        }
+    ],
+    "rawQuery": "T1 = scan(TwitterK);\nT2 = scan(TwitterK);\nT3 = [from T1,T2 where T1.$1 = T2.$0 and T2.$1 > 42 emit T1.$0, T2.$1];\nstore(T3, stupidPlan);"
+}
