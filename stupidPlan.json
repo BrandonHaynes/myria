@@ -5,8 +5,8 @@
             "operators": [{
                     "opId": 1,
                     "opType": "DbQueryScan",
-                    "schema": {"columnNames":["column0","column1"], "columnTypes": ["INT_TYPE","INT_TYPE"]},
-                    "sql":"SELECT column0, column1 FROM \"public:adhoc:smallEx\"",
+                    "schema": {"columnNames":["column0","column1"], "columnTypes": ["STRING_TYPE","STRING_TYPE"]},
+                    "sql":"SELECT * FROM \"public:adhoc:smallEx\"",
                     "opName": "SQL"
                 },
                 {   

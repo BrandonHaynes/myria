@@ -7,3 +7,5 @@ cd ~/Documents/Databases/myria/myriadeploy
 sleep 3
 cd ~/Documents/Databases/myria-python/
 myria_upload ~/Documents/Databases/stupidData.txt --relation smallEx --no-ssl --hostname localhost -p 8753
+
+

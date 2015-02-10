@@ -26,21 +26,21 @@ public final class SocketDataOutput extends RootOperator {
   /** Whether this object has finished. */
   private boolean done = false;
   private int port;
-  private int numDims;
+  private final int numDims;
   private ServerSocket serverSocket;
 
   private boolean needsHeader;
 
-  /**
-   * Instantiate a new DataOutput operator, which will stream its tuples to the specified {@link TupleWriter}.
-   * 
-   * @param child the source of tuples to be streamed.
-   * @param writer the {@link TupleWriter} which will serialize the tuples.
-   */
-  public SocketDataOutput(final Operator child, final TupleWriter writer) {
-    super(child);
-    tupleWriter = writer;
-  }
+  // /**
+  //  * Instantiate a new DataOutput operator, which will stream its tuples to the specified {@link TupleWriter}.
+  //  * 
+  //  * @param child the source of tuples to be streamed.
+  //  * @param writer the {@link TupleWriter} which will serialize the tuples.
+  //  */
+  // public SocketDataOutput(final Operator child, final TupleWriter writer) {
+  //   super(child);
+  //   tupleWriter = writer;
+  // }
 
 // Have the tuplewriter write to a socket
   public SocketDataOutput(final Operator child, final int port, final boolean header, final int numDims) 
@@ -78,14 +78,14 @@ public final class SocketDataOutput extends RootOperator {
 
   @Override
   protected void init(final ImmutableMap<String, Object> execEnvVars) throws DbException {
-    if(needsHeader){
-      try {
-        serverSocket = new ServerSocket(port);
-        tupleWriter = new ScidbTupleWriter(serverSocket.accept().getOutputStream(), numDims);
+    try {
+      serverSocket = new ServerSocket(port);
+      tupleWriter = new ScidbTupleWriter(serverSocket.accept().getOutputStream(), numDims);
+      if(needsHeader){
         tupleWriter.writeColumnHeaders(getChild().getSchema().getColumnNames());
-     } catch (IOException e) {
-        throw new DbException(e);
       }
+    } catch (IOException e) {
+      throw new DbException(e);
     }
   }
 

@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.ArrayList;
+import java.lang.StringBuilder;
 
 
 import org.apache.commons.csv.CSVFormat;
@@ -14,6 +15,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import edu.washington.escience.myria.storage.ReadableTable;
+import edu.washington.escience.myria.Type;
 
 /**
  * CsvTupleWriter is a {@link TupleWriter} that serializes tuples to a delimited file, usually a CSV. It uses a
@@ -28,7 +30,7 @@ public class ScidbTupleWriter implements TupleWriter {
 
   /** The CSVWriter used to write the output. */
   private transient CSVPrinter csvPrinter;
-  private int numDims;
+  private final int numDims;
   static final long serialVersionUID = 1L;
 
   /**
@@ -39,8 +41,7 @@ public class ScidbTupleWriter implements TupleWriter {
    * @throws IOException if there is an IO exception
    */
   public ScidbTupleWriter(final OutputStream out, final int dims) throws IOException {   
-    this(out, CSVFormat.DEFAULT.withEscape('\\').withQuoteMode(QuoteMode.NONE));
-    numDims = dims;
+    this(dims, out, CSVFormat.DEFAULT.withEscape(' ').withQuoteMode(QuoteMode.NONE));
   }
 
   /**
@@ -51,8 +52,8 @@ public class ScidbTupleWriter implements TupleWriter {
    * @param out the {@link OutputStream} to which the data will be written.
    * @throws IOException if there is an IO exception
    */
-  public ScidbTupleWriter(final char separator, final OutputStream out) throws IOException {
-    this(out, CSVFormat.DEFAULT.withDelimiter(separator).withEscape('\\').withQuoteMode(QuoteMode.NONE));
+  public ScidbTupleWriter(final OutputStream out, final int dims, final char separator) throws IOException {
+    this(dims, out, CSVFormat.DEFAULT.withDelimiter(separator).withEscape('\\').withQuoteMode(QuoteMode.NONE));
   }
 
   /**
@@ -60,33 +61,37 @@ public class ScidbTupleWriter implements TupleWriter {
    * @param csvFormat the CSV format.
    * @throws IOException if there is an IO exception
    */
-  private ScidbTupleWriter(final OutputStream out, final CSVFormat csvFormat) throws IOException {
+  private ScidbTupleWriter(final int dims, final OutputStream out, final CSVFormat csvFormat) throws IOException {
     csvPrinter = new CSVPrinter(new BufferedWriter(new OutputStreamWriter(out)), csvFormat);
+    this.numDims = dims;
   }
 
   @Override
   public void writeColumnHeaders(final List<String> columnNames) throws IOException {  
     List<String> toReturn = new ArrayList<String>();
-    String toAppend = "{";
+    StringBuilder toAppend = new StringBuilder("{");
     if(numDims>0){
-      for(int i=0; i<numDims; i++){
-        toAppend += columnNames.get(i) + ",";
+      for(String column: columnNames.subList(0, numDims)){
+        toAppend.append(column + ",");
       }
-      toAppend = toAppend.substring(0, toAppend.length()-1);      
+      toAppend.deleteCharAt(toAppend.lastIndexOf(","));    
     }
     else{
-      toAppend += "i";
+      toAppend.append("i");
     }
-    toAppend += "} ";
-    toReturn.add(toAppend + columnNames.get(numDims));
-    for(int i=numDims+1; i<columnNames.size(); i++){
-      toReturn.add(columnNames.get(i));
+    toAppend.append("} ");
+    toReturn.add(toAppend.toString() + columnNames.get(numDims));
+    for(String column: columnNames.subList(numDims+1, columnNames.size())){
+      toReturn.add(column);
     }
     csvPrinter.printRecord(toReturn);
   }
 
-  public String formatString(String value){
-    if(NumberUtils.isNumber(value)){
+  public String formatString(Type type, String value){
+    if(type.equals(Type.INT_TYPE) 
+        || type.equals(Type.FLOAT_TYPE) 
+        || type.equals(Type.DOUBLE_TYPE) 
+        || type.equals(Type.LONG_TYPE)){
       return value;
     }
     else{
@@ -97,22 +102,24 @@ public class ScidbTupleWriter implements TupleWriter {
   @Override
   public void writeTuples(final ReadableTable tuples) throws IOException {
     final String[] row = new String[tuples.numColumns()-numDims];
+    List<Type> types = tuples.getSchema().getColumnTypes();
     /* Serialize every row into the output stream. */
     for (int i = 0; i < tuples.numTuples(); ++i) {
-      String toAppend = "{";
+      StringBuilder toAppend = new StringBuilder("{");
       // If the first columns are dimensions, pull them off
       if(numDims>0){
         for (int j = 0; j < numDims; ++j) {
-          toAppend +=  tuples.getObject(j, i).toString() + ",";
+          toAppend.append(tuples.getObject(j, i).toString() + ",");
         }
-        toAppend = toAppend.substring(0, toAppend.length()-1);
+        toAppend.deleteCharAt(toAppend.lastIndexOf(","));
       }
       else{
-        toAppend += Integer.toString(i);
+        toAppend.append(Integer.toString(i));
       }
-      row[0] = toAppend + "} " + formatString(tuples.getObject(numDims, i).toString());
+      toAppend.append("} ");
+      row[0] = toAppend.toString() + formatString(types.get(numDims), tuples.getObject(numDims, i).toString());
       for (int j=numDims+1; j<tuples.numColumns(); j++){
-        row[j-numDims] = formatString(tuples.getObject(j, i).toString());
+        row[j-numDims] = formatString(types.get(j), tuples.getObject(j, i).toString());
       }
       csvPrinter.printRecord((Object[]) row);
     }
