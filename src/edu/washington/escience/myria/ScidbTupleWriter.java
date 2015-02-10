@@ -72,9 +72,9 @@ public class ScidbTupleWriter implements TupleWriter {
     StringBuilder toAppend = new StringBuilder("{");
     if(numDims>0){
       for(String column: columnNames.subList(0, numDims)){
-        toAppend.append(column + ",");
+        toAppend.append(column).append(',');
       }
-      toAppend.deleteCharAt(toAppend.lastIndexOf(","));    
+      toAppend.deleteCharAt(toAppend.lastIndexOf(','));    
     }
     else{
       toAppend.append("i");
@@ -109,9 +109,9 @@ public class ScidbTupleWriter implements TupleWriter {
       // If the first columns are dimensions, pull them off
       if(numDims>0){
         for (int j = 0; j < numDims; ++j) {
-          toAppend.append(tuples.getObject(j, i).toString() + ",");
+          toAppend.append(tuples.getObject(j, i).toString()).append(',');
         }
-        toAppend.deleteCharAt(toAppend.lastIndexOf(","));
+        toAppend.deleteCharAt(toAppend.lastIndexOf(','));
       }
       else{
         toAppend.append(Integer.toString(i));

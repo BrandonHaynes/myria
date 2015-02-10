@@ -5,7 +5,7 @@
             "operators": [{
                     "opId": 1,
                     "opType": "DbQueryScan",
-                    "schema": {"columnNames":["column0","column1"], "columnTypes": ["STRING_TYPE","STRING_TYPE"]},
+                    "schema": {"columnNames":["column0","column1","column2","column3"], "columnTypes": ["INT_TYPE","INT_TYPE","STRING_TYPE","STRING_TYPE"]},
                     "sql":"SELECT * FROM \"public:adhoc:smallEx\"",
                     "opName": "SQL"
                 },
@@ -15,7 +15,7 @@
                     "argChild": 1,
                     "port":9999,
                     "header": true,
-                    "numDims": 0
+                    "numDims": 2
                 }
             ]
         }
