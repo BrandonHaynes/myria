@@ -28,27 +28,24 @@ public final class SocketDataOutput extends RootOperator {
   private int port;
   private final int numDims;
   private ServerSocket serverSocket;
-
-  private boolean needsHeader;
-
-  // /**
-  //  * Instantiate a new DataOutput operator, which will stream its tuples to the specified {@link TupleWriter}.
-  //  * 
-  //  * @param child the source of tuples to be streamed.
-  //  * @param writer the {@link TupleWriter} which will serialize the tuples.
-  //  */
-  // public SocketDataOutput(final Operator child, final TupleWriter writer) {
-  //   super(child);
-  //   tupleWriter = writer;
-  // }
+  private final int chunkSize;
 
 // Have the tuplewriter write to a socket
-  public SocketDataOutput(final Operator child, final int port, final boolean header, final int numDims) 
+  public SocketDataOutput(final Operator child, final int port, final int numDims) 
     throws IOException{
     super(child);
     this.port = port;
     this.numDims = numDims;
-    needsHeader=header;
+    this.chunkSize=0;
+  }
+
+// Have the tuplewriter write to a socket
+  public SocketDataOutput(final Operator child, final int port, final int numDims, final int chunkSize) 
+    throws IOException{
+    super(child);
+    this.port = port;
+    this.numDims = numDims;
+    this.chunkSize = chunkSize;
   }
 
   @Override
@@ -80,9 +77,11 @@ public final class SocketDataOutput extends RootOperator {
   protected void init(final ImmutableMap<String, Object> execEnvVars) throws DbException {
     try {
       serverSocket = new ServerSocket(port);
-      tupleWriter = new ScidbTupleWriter(serverSocket.accept().getOutputStream(), numDims);
-      if(needsHeader){
-        tupleWriter.writeColumnHeaders(getChild().getSchema().getColumnNames());
+      if(this.chunkSize==0){
+       tupleWriter = new ScidbTupleWriter(serverSocket.accept().getOutputStream(), numDims);
+      }
+      else{
+        tupleWriter = new ScidbTupleWriter(serverSocket.accept().getOutputStream(), numDims, chunkSize);
       }
     } catch (IOException e) {
       throw new DbException(e);

@@ -21,15 +21,20 @@ public class SocketDataOutputEncoding extends UnaryOperatorEncoding<SocketDataOu
   @Required
   public int port;
   @Required
-  public Boolean header;
-  @Required
   public int numDims;
+  @Required
+  public int chunkSize;
 
   @Override
   public SocketDataOutput construct(ConstructArgs args){
     /* default overwrite to {@code false}, so we append. */
     try{
-      return new SocketDataOutput(null, port, header, numDims);
+      if(chunkSize==0){
+        return new SocketDataOutput(null, port, numDims);
+      }
+      else{
+        return new SocketDataOutput(null, port, numDims, chunkSize);
+      }
     }
     catch(IOException e){
       throw new MyriaApiException(Status.INTERNAL_SERVER_ERROR,e);
