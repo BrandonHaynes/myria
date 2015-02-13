@@ -9,6 +9,7 @@ import edu.washington.escience.myria.DbException;
 import edu.washington.escience.myria.TupleWriter;
 import edu.washington.escience.myria.storage.TupleBatch;
 import edu.washington.escience.myria.ScidbTupleWriter;
+import edu.washington.escience.myria.ScidbBinaryTupleWriter;
 import java.net.*;
 
 /**
@@ -29,23 +30,26 @@ public final class SocketDataOutput extends RootOperator {
   private final int numDims;
   private ServerSocket serverSocket;
   private final int chunkSize;
+  private final boolean csvFormat;
 
 // Have the tuplewriter write to a socket
-  public SocketDataOutput(final Operator child, final int port, final int numDims) 
+  public SocketDataOutput(final Operator child, final int port, final int numDims, final boolean csvFormat) 
     throws IOException{
     super(child);
     this.port = port;
     this.numDims = numDims;
     this.chunkSize=0;
+    this.csvFormat = csvFormat;
   }
 
 // Have the tuplewriter write to a socket
-  public SocketDataOutput(final Operator child, final int port, final int numDims, final int chunkSize) 
+  public SocketDataOutput(final Operator child, final int port, final int numDims, final int chunkSize, final boolean csvFormat) 
     throws IOException{
     super(child);
     this.port = port;
     this.numDims = numDims;
     this.chunkSize = chunkSize;
+    this.csvFormat = csvFormat;
   }
 
   @Override
@@ -77,12 +81,17 @@ public final class SocketDataOutput extends RootOperator {
   protected void init(final ImmutableMap<String, Object> execEnvVars) throws DbException {
     try {
       serverSocket = new ServerSocket(port);
-      if(this.chunkSize==0){
-       tupleWriter = new ScidbTupleWriter(serverSocket.accept().getOutputStream(), numDims);
+      if(this.csvFormat){
+        if(this.chunkSize==0){
+          tupleWriter = new ScidbTupleWriter(serverSocket.accept().getOutputStream(), numDims);
+        }
+        else{
+          tupleWriter = new ScidbTupleWriter(serverSocket.accept().getOutputStream(), numDims, chunkSize);
+        }
       }
       else{
-        tupleWriter = new ScidbTupleWriter(serverSocket.accept().getOutputStream(), numDims, chunkSize);
-      }
+        tupleWriter = new ScidbBinaryTupleWriter(serverSocket.accept().getOutputStream(), numDims);
+      }     
     } catch (IOException e) {
       throw new DbException(e);
     }

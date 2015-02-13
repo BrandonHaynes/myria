@@ -28,7 +28,6 @@ public class ScidbTupleWriter implements TupleWriter {
   private transient PrintWriter printer;
   private final int numDims;
   private final int chunkSize;
-  static final long serialVersionUID = 1L;
 
   /**
    * Constructs a {@link CsvTupleWriter} object that will produce an Excel-compatible comma-separated value (CSV) file

@@ -24,16 +24,18 @@ public class SocketDataOutputEncoding extends UnaryOperatorEncoding<SocketDataOu
   public int numDims;
   @Required
   public int chunkSize;
+  @Required 
+  public boolean csvFormat;
 
   @Override
   public SocketDataOutput construct(ConstructArgs args){
     /* default overwrite to {@code false}, so we append. */
     try{
       if(chunkSize==0){
-        return new SocketDataOutput(null, port, numDims);
+        return new SocketDataOutput(null, port, numDims, csvFormat);
       }
       else{
-        return new SocketDataOutput(null, port, numDims, chunkSize);
+        return new SocketDataOutput(null, port, numDims, chunkSize, csvFormat);
       }
     }
     catch(IOException e){

@@ -5,7 +5,7 @@
             "operators": [{
                     "opId": 1,
                     "opType": "DbQueryScan",
-                    "schema": {"columnNames":["column0","column1","column2"], "columnTypes": ["INT_TYPE","INT_TYPE","STRING_TYPE"]},
+                    "schema": {"columnNames":["column0","column1","column2"], "columnTypes": ["INT_TYPE","INT_TYPE","DOUBLE_TYPE"]},
                     "sql":"SELECT * FROM \"public:adhoc:smallEx\"",
                     "opName": "SQL"
                 },
@@ -14,8 +14,9 @@
                     "opType": "SocketDataOutput",
                     "argChild": 1,
                     "port":9999,
-                    "chunkSize":2,
-                    "numDims": 1
+                    "chunkSize": 2,
+                    "numDims": 1,
+                    "csvFormat": true
                 }
             ]
         }
