@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.DataOutputStream;
+import java.io.DataOutput;
 import java.util.List;
 import java.util.ArrayList;
 import edu.washington.escience.myria.DbException;
+import com.google.common.io.LittleEndianDataOutputStream;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -26,8 +28,9 @@ import edu.washington.escience.myria.Type;
 public class ScidbBinaryTupleWriter implements TupleWriter {
 
   /** The CSVWriter used to write the output. */
-  private transient DataOutputStream printer;
+  private transient DataOutput printer;
   private final int numDims;
+  private final boolean isLittleEndian;
 
   /**
    * Constructs a {@link CsvTupleWriter} object that will produce an Excel-compatible comma-separated value (CSV) file
@@ -36,9 +39,15 @@ public class ScidbBinaryTupleWriter implements TupleWriter {
    * @param out the {@link OutputStream} to which the data will be written.
    * @throws IOException if there is an IO exception
    */
-  public ScidbBinaryTupleWriter(final OutputStream out, final int dims) throws IOException {   
-    this.printer = new DataOutputStream(out);
+  public ScidbBinaryTupleWriter(final OutputStream out, final int dims, final boolean isLittleEndian) throws IOException {   
     this.numDims = dims;
+    this.isLittleEndian = isLittleEndian;
+    if(isLittleEndian){
+      this.printer = new LittleEndianDataOutputStream(out);
+    }
+    else{
+      this.printer = new DataOutputStream(out);
+    }
   }
 
   @Override
@@ -80,7 +89,12 @@ public class ScidbBinaryTupleWriter implements TupleWriter {
 
   @Override
   public void done() throws IOException {
-    printer.close();
+    if(printer instanceof DataOutputStream){
+      ((DataOutputStream) printer).close();
+    }
+    else{
+      ((LittleEndianDataOutputStream) printer).close();
+    }
   }
 
   @Override
@@ -88,7 +102,7 @@ public class ScidbBinaryTupleWriter implements TupleWriter {
     try {
       printer.writeChars("There was an error. Investigate the query status to see the message");
     } finally {
-      printer.close();
+      done();
     }
   }
 }

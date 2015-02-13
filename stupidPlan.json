@@ -13,10 +13,11 @@
                     "opId": 2,
                     "opType": "SocketDataOutput",
                     "argChild": 1,
-                    "port":9999,
-                    "chunkSize": 2,
+                    "port":9999,                   
                     "numDims": 1,
-                    "csvFormat": true
+                    "chunkSize": 2,                   
+                    "csvFormat": true,
+                    "isLittleEndian": true
                 }
             ]
         }

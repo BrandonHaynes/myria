@@ -26,17 +26,14 @@ public class SocketDataOutputEncoding extends UnaryOperatorEncoding<SocketDataOu
   public int chunkSize;
   @Required 
   public boolean csvFormat;
+  @Required
+  public boolean isLittleEndian;
 
   @Override
   public SocketDataOutput construct(ConstructArgs args){
     /* default overwrite to {@code false}, so we append. */
     try{
-      if(chunkSize==0){
-        return new SocketDataOutput(null, port, numDims, csvFormat);
-      }
-      else{
-        return new SocketDataOutput(null, port, numDims, chunkSize, csvFormat);
-      }
+      return new SocketDataOutput(null, port, numDims, csvFormat, chunkSize, isLittleEndian);
     }
     catch(IOException e){
       throw new MyriaApiException(Status.INTERNAL_SERVER_ERROR,e);

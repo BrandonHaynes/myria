@@ -31,25 +31,18 @@ public final class SocketDataOutput extends RootOperator {
   private ServerSocket serverSocket;
   private final int chunkSize;
   private final boolean csvFormat;
+  private final boolean isLittleEndian;
 
-// Have the tuplewriter write to a socket
-  public SocketDataOutput(final Operator child, final int port, final int numDims, final boolean csvFormat) 
-    throws IOException{
-    super(child);
-    this.port = port;
-    this.numDims = numDims;
-    this.chunkSize=0;
-    this.csvFormat = csvFormat;
-  }
-
-// Have the tuplewriter write to a socket
-  public SocketDataOutput(final Operator child, final int port, final int numDims, final int chunkSize, final boolean csvFormat) 
+  // Chunk size specified
+  public SocketDataOutput(final Operator child, final int port, final int numDims, 
+    final boolean csvFormat, final int chunkSize, final boolean isLittleEndian) 
     throws IOException{
     super(child);
     this.port = port;
     this.numDims = numDims;
     this.chunkSize = chunkSize;
     this.csvFormat = csvFormat;
+    this.isLittleEndian = isLittleEndian;
   }
 
   @Override
@@ -90,7 +83,7 @@ public final class SocketDataOutput extends RootOperator {
         }
       }
       else{
-        tupleWriter = new ScidbBinaryTupleWriter(serverSocket.accept().getOutputStream(), numDims);
+        tupleWriter = new ScidbBinaryTupleWriter(serverSocket.accept().getOutputStream(), numDims, isLittleEndian);
       }     
     } catch (IOException e) {
       throw new DbException(e);
