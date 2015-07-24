@@ -16,6 +16,14 @@ import edu.washington.escience.myria.accessmethod.AccessMethod;
 import edu.washington.escience.myria.accessmethod.ConnectionInfo;
 import edu.washington.escience.myria.storage.TupleBatch;
 
+import edu.washington.escience.myria.column.DoubleColumn;
+import edu.washington.escience.myria.column.LongColumn;
+import edu.washington.escience.myria.column.Column;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.util.Random;
+
 /**
  * Push a select query down into a JDBC based database and scan over the query result.
  * */
@@ -169,8 +177,27 @@ public class DbQueryScan extends LeafOperator implements DbReader {
     tuples = null;
   }
 
+    int remaining =1000000/8;
+    static double[] doubles = new double[TupleBatch.BATCH_SIZE];
+    static long[] longs = new long[TupleBatch.BATCH_SIZE];
+
   @Override
   protected final TupleBatch fetchNextReady() throws DbException {
+      /*
+      if(remaining > 0)
+	  {
+	      remaining -= TupleBatch.BATCH_SIZE;
+              List<Column<?>> columns = new ArrayList<Column<?>>();
+	      DoubleColumn column = new DoubleColumn(doubles, TupleBatch.BATCH_SIZE);
+	      //	      LongColumn column2 = new LongColumn(longs, TupleBatch.BATCH_SIZE);
+              columns.add(column);
+	      //	      columns.add(column2);
+	      TupleBatch b = new TupleBatch(outputSchema, columns);
+	      return b;
+	  }
+      else
+	  return null;
+      */
     Objects.requireNonNull(connectionInfo);
     if (tuples == null) {
       tuples =
@@ -193,6 +220,10 @@ public class DbQueryScan extends LeafOperator implements DbReader {
 
   @Override
   protected final void init(final ImmutableMap<String, Object> execEnvVars) throws DbException {
+      Random rand = new Random();
+      for(int i = 0; i < doubles.length; i++)
+      	  doubles[i] = i; //rand.nextDouble();
+
     if (connectionInfo == null) {
       final String dbms = (String) execEnvVars.get(MyriaConstants.EXEC_ENV_VAR_DATABASE_SYSTEM);
       if (dbms == null) {

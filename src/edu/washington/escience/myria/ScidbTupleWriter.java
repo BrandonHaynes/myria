@@ -72,13 +72,18 @@ public class ScidbTupleWriter implements TupleWriter {
    }
   }
 
+    int offset = 0;  
+
   @Override
   public void writeTuples(final ReadableTable tuples) throws IOException {
     final String[] row = new String[tuples.numColumns()-numDims];
     List<Type> types = tuples.getSchema().getColumnTypes();
     int numTuples = tuples.numTuples();
     int index = 0;
-    printer.print("{0}[\n");
+    printer.print("{");
+    printer.print(offset);
+    printer.print("}[\n");
+    offset += numTuples;
     /* Serialize every row into the output stream. */
     for (int i = 0; i < numTuples; ++i) {
       // If the first columns are dimensions, pull them off     
@@ -88,7 +93,7 @@ public class ScidbTupleWriter implements TupleWriter {
         printer.print(',');
         printer.print(formatString(types.get(j), tuples.getObject(j, i).toString()));
       }
-      printer.print(')');
+      printer.print(")\n"); //')\n');
 
       //check whether the next tuple fits in the current chunk
       if((i+1)==numTuples){

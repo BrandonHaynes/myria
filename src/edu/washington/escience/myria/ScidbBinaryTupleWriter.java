@@ -16,6 +16,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import edu.washington.escience.myria.storage.ReadableTable;
 import edu.washington.escience.myria.Type;
 
+import java.io.BufferedOutputStream;
+
 /**
  * CsvTupleWriter is a {@link TupleWriter} that serializes tuples to a delimited file, usually a CSV. It uses a
  * {@link CSVPrinter} to do the underlying serialization. The fields to be output may contain special characters such as
@@ -43,10 +45,10 @@ public class ScidbBinaryTupleWriter implements TupleWriter {
     this.numDims = dims;
     this.isLittleEndian = isLittleEndian;
     if(isLittleEndian){
-      this.printer = new LittleEndianDataOutputStream(out);
+	this.printer = new LittleEndianDataOutputStream(new BufferedOutputStream(out));
     }
     else{
-      this.printer = new DataOutputStream(out);
+	this.printer = new DataOutputStream(new BufferedOutputStream(out));
     }
   }
 
@@ -63,8 +65,10 @@ public class ScidbBinaryTupleWriter implements TupleWriter {
     /* Serialize every row into the output stream. */
     for (int i = 0; i < numTuples; ++i) {
       // If the first columns are dimensions, ignore them      
-      for (int j=numDims; j<tuples.numColumns(); j++){
+      for (int j=0; j<tuples.numColumns(); j++){
         Type type = types.get(j);
+	//if(type != null)
+	//    throw new RuntimeException(type.toString());
         if(type.equals(Type.INT_TYPE)){
           printer.writeInt(tuples.getInt(j, i));
         }
@@ -72,7 +76,8 @@ public class ScidbBinaryTupleWriter implements TupleWriter {
           printer.writeFloat(tuples.getFloat(j, i));
         }
         else if(type.equals(Type.DOUBLE_TYPE)){
-          printer.writeDouble(tuples.getDouble(j, i));
+	    //throw new RuntimeException(new Double(tuples.getDouble(j, i)).toString());
+	    	              printer.writeDouble(tuples.getDouble(j, i));
         }
         else if(type.equals(Type.LONG_TYPE)){
           printer.writeLong(tuples.getLong(j, i));
